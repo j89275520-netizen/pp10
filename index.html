@@ -985,7 +985,11 @@ ${JSON.stringify(trades, null, 2)}
 \`\`\`
 
 두 가지 모두 변경되면 둘 다 출력.
-스샷에서 종목명/매매구분/체결수량/체결가격 읽어서 반영.`;
+스샷에서 종목명/매매구분/체결수량/체결가격 읽어서 반영.
+
+■ 출력 규칙
+- 계산 요약 출력 금지
+- 항목명·값 줄 분리 표기`;
 
   // 이전 대화에서 이미지 제거 (텍스트만 유지) - 용량 절약
   const trimmedHistory = chatHistory.map((msg, idx) => {
@@ -999,7 +1003,7 @@ ${JSON.stringify(trades, null, 2)}
   }).filter(Boolean);
 
   try {
-    const res=await fetch('https://misty-truth-3915.j89275520.workers.dev',{
+    const res=await fetch('/api/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4096,system:systemPrompt,messages:trimmedHistory})
