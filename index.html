@@ -532,7 +532,7 @@ MIN(20일선손절가, 기계적손절가) → 둘 중 낮은 가격 사용
 // ═══════════════════════════════════════════════
 let portfolio = loadPortfolio();
 let trades    = loadTrades();
-let pendingImgs = [];
+let pendingImgs = JSON.parse(sessionStorage.getItem("pendingImgs") || "[]");
 let chatHistory = loadChatHistory();
 let tradeFilter = '전체';
 
@@ -793,7 +793,7 @@ function handleFiles(e) {
         canvas.getContext('2d').drawImage(img,0,0,w,h);
         const dataUrl=canvas.toDataURL('image/jpeg',0.7);
         const b64=dataUrl.split(',')[1];
-        pendingImgs.push({file, dataUrl, b64, type:'image/jpeg'});
+        pendingImgs.push({dataUrl, b64, type:"image/jpeg"}); sessionStorage.setItem("pendingImgs", JSON.stringify(pendingImgs));
         renderPreviews();
       };
       img.src=ev.target.result;
@@ -810,7 +810,7 @@ function renderPreviews() {
       <button class="img-rm" onclick="rmImg(${i})">×</button>
     </div>`).join('');
 }
-function rmImg(i){ pendingImgs.splice(i,1); renderPreviews(); }
+function rmImg(i){ pendingImgs.splice(i,1); sessionStorage.setItem("pendingImgs", JSON.stringify(pendingImgs)); renderPreviews(); }
 function autoResize(ta){ ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,120)+'px'; }
 
 // 모바일에서 엔터 = 줄바꿈, Shift+엔터도 줄바꿈, 전송은 버튼만
@@ -926,7 +926,7 @@ async function sendMsg() {
   const b64imgs=pendingImgs.map(i=>({b64:i.b64,type:i.type||'image/jpeg'}));
   addMsg('user', text||'(스샷 전송)', prevImgs.length?prevImgs:null);
   ta.value=''; autoResize(ta);
-  pendingImgs=[]; renderPreviews();
+  pendingImgs=[]; sessionStorage.removeItem("pendingImgs"); renderPreviews();
   document.getElementById('sendBtn').disabled=true;
   showLoading();
 
@@ -1003,7 +1003,7 @@ ${JSON.stringify(trades, null, 2)}
   }).filter(Boolean);
 
   try {
-    const res=await fetch('/api/claude',{
+    const res=await fetch('https://misty-truth-3915.j89275520.workers.dev',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4096,system:systemPrompt,messages:trimmedHistory})
